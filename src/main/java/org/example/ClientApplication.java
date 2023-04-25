@@ -35,7 +35,7 @@ public class ClientApplication implements SecretKeyExchange.SendKey{
     }
 
     public void executeSecretKeyExchange(byte[] pubKey) throws InterruptedException {
-        secretKeyExchange = new SecretKeyExchange(this, pubKey);
+        secretKeyExchange = new SecretKeyExchange(this, pubKey, terminalApplicationResponse);
         secretKeyExchange.start();
     }
 
@@ -95,6 +95,8 @@ public class ClientApplication implements SecretKeyExchange.SendKey{
             throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public void sendError(String error) {
@@ -176,6 +178,7 @@ public class ClientApplication implements SecretKeyExchange.SendKey{
 
     public interface TerminalApplicationResponse{
         void openTalk();
+        void startSecureTalk();
         void showConnectionProcess();
     }
    // traffic interface here

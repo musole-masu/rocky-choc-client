@@ -23,11 +23,16 @@ public class LoggingMessage {
     public static final String RED_CIRCLE = "\uD83D\uDD34";
     public static final String GREEN_CIRCLE = "\uD83D\uDFE2";
     public static final String CHEER_BEER = "\uD83C\uDF7B";
+    public static final String ENVELOP = "\u2709";
+    public static final String CLOSED_MAILBOX = "\uD83D\uDCEB";
+    public static final String PACKAGE = "\uD83D\uDCE6";
 
 
     public static void printWelcomeText(String s){
         System.out.println("*****************************************************************");
         System.out.println(ANSI_GREEN+"WELCOME TO ROCKY ROC CLIENT! "+ANSI_RESET + "\uD83D\uDE00");
+        System.out.println(ANSI_GREEN+"ROCKY ROC CLIENT CONNECTS TO ROCKY SERVER, A VPN SERVER (PROXY) THAT \n" +
+                "ENCRYPTS CLIENT QUERIES AND HIDES CLIENT IP ADDRESS TO THE DESTINATION SERVER "+ANSI_RESET + "\uD83D\uDE00");
         System.out.println("*****************************************************************");
 
 
@@ -41,14 +46,14 @@ public class LoggingMessage {
 
 
     public static void printColoredText(String txt, String color){
-        System.out.println(color+"[--] "+txt.toUpperCase()+ANSI_RESET);
+        System.out.println(color+"[--] "+txt+ANSI_RESET);
     }
 
     public static void printInStream(String txt){
-        System.out.println(ANSI_GREEN+"[--] " + GREEN_CIRCLE + " " + txt.toUpperCase()+ANSI_RESET);
+        System.out.println(ANSI_GREEN+"[--] " + GREEN_CIRCLE + " " + txt+ANSI_RESET);
     }
     public static void printInStream(String txt, String icon){
-        System.out.println(ANSI_GREEN+"[--] " + GREEN_CIRCLE + " " + txt.toUpperCase()+ANSI_RESET + " " +icon);
+        System.out.println(ANSI_GREEN+"[--] " + GREEN_CIRCLE + " " + txt+ANSI_RESET + " " +icon);
     }
     public static void printOutStream(String txt){
         System.out.println(ANSI_GREEN+"[--] " + RED_CIRCLE + " " + txt.toUpperCase()+ANSI_RESET);
@@ -69,5 +74,13 @@ public class LoggingMessage {
         Thread.sleep(1000);
         System.out.println(ANSI_BLUE+"[--PROGRESS--] "+s.toUpperCase()+ " " + ANSI_RESET + THINKING_FACE + " " + THINKING_FACE);
         Thread.sleep(1000);
+    }
+    public static void printProgress(String msg, String icon){
+        System.out.println("\n"+ msg.toUpperCase());
+        for (int i = 0; i < 31; i++){
+            CipherUtils.wait(50);
+            System.out.print(icon);
+        }
+        System.out.println("\n");
     }
 }

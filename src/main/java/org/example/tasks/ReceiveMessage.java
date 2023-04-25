@@ -1,11 +1,16 @@
 package org.example.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.ClientApplication;
 import org.example.utils.CipherUtils;
 import org.example.utils.LoggingMessage;
+import org.example.utils.SearchResult;
+import org.example.utils.SearchResults;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
 
 public class ReceiveMessage extends Thread{
     private ClientApplication clientApplication;
@@ -49,7 +54,50 @@ public class ReceiveMessage extends Thread{
         } else if (cmd == CipherUtils.ENCRYPTED_MESSAGE){
             // start some progress action in the background
             CipherUtils.wait(2000);
-            System.out.println("Message Encrypted " + message);
+
+            if (message.split("##")[0].equals("queryResult")){
+                try {
+                    String decryptedQueryResponse = clientApplication.decrypt(message.split("##")[1]);
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    SearchResults searchResults = objectMapper.readValue(decryptedQueryResponse, SearchResults.class);
+
+                    LoggingMessage.printInStream("Query result from server: ", LoggingMessage.THUMBS_UP);
+                    // Print the search results
+                    List<SearchResult> results = searchResults.getResults();
+                    for (SearchResult result : results) {
+                        LoggingMessage.printColoredText(result.getPosition() + " - " + result.getTitle() + " - " + result.getUrl()+ " ==> "+result.getDescription(), LoggingMessage.ANSI_CYAN);
+                    }
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            LoggingMessage.printColoredText("Type yes for a new query", LoggingMessage.ANSI_GREEN);
+
+            Scanner sc = new Scanner(System.in);
+            String yes = sc.nextLine();
+
+            if (yes.equals("yes")){
+                LoggingMessage.printColoredText( "FILL THE EMPTY SPACE BELOW WITH A SPECIFIC SEARCH QUERY "+LoggingMessage.CLOSED_MAILBOX+ ":", LoggingMessage.ANSI_GREEN);
+                String toServer = sc.nextLine();
+
+                try {
+                    LoggingMessage.printProgress("ENCRYPTING DATA ...", LoggingMessage.CLOSED_LOCK_WITH_KEY);
+
+                    String encryptedData = clientApplication.encrypt(toServer);
+                    LoggingMessage.printColoredText("Encrypted Data: " + encryptedData, LoggingMessage.ANSI_GREEN);
+                    LoggingMessage.printProgress("Sending Encrypted Data", LoggingMessage.PACKAGE);
+                    clientApplication.sendMessage(encryptedData);
+                    LoggingMessage.printOutStream("Data Sent to server");
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("exit");
+            }
+
         } else if (cmd == CipherUtils.REQUEST_NEW_KEY){
             byte[] decodedPublicKey = CipherUtils.decodeBase64(message);
             clientApplication.executeSecretKeyExchange(decodedPublicKey);

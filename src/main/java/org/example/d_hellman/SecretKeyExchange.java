@@ -1,6 +1,7 @@
 package org.example.d_hellman;
 
 import org.apache.commons.codec.binary.Base64;
+import org.example.ClientApplication;
 import org.example.utils.CipherUtils;
 import org.example.utils.LoggingMessage;
 
@@ -28,9 +29,12 @@ public class SecretKeyExchange extends Thread{
     private byte[] bytePubKey;
     private volatile String strPrivateKey;
 
-    public SecretKeyExchange(SendKey send, byte[] pbk){
+    private ClientApplication.TerminalApplicationResponse terminalApplicationResponse;
+
+    public SecretKeyExchange(SendKey send, byte[] pbk, ClientApplication.TerminalApplicationResponse terminalApplicationResponse){
         this.sender = send;
         this.bytePubKey = pbk;
+        this.terminalApplicationResponse = terminalApplicationResponse;
 
     }
 
@@ -117,8 +121,16 @@ public class SecretKeyExchange extends Thread{
 
         this.strPrivateKey = Base64.encodeBase64String(CipherUtils.generateAESKey(commonSecret).getEncoded());
         System.out.println("*****************************************************************");
-        LoggingMessage.printColoredText(LoggingMessage.CHEER_BEER +" Common Shared Secret Successfully Generated", LoggingMessage.ANSI_RED);
+        LoggingMessage.printColoredText(LoggingMessage.CHEER_BEER +" Common Shared Secret Generated: "+ this.strPrivateKey, LoggingMessage.ANSI_RED);
         System.out.println("*****************************************************************");
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        terminalApplicationResponse.startSecureTalk();
     }
 
     public String getStrPrivateKey() {

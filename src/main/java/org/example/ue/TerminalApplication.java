@@ -5,12 +5,15 @@ import org.example.TerminalResponseInterface;
 import org.example.utils.CipherUtils;
 import org.example.utils.LoggingMessage;
 
+import java.util.Scanner;
+
 public class TerminalApplication implements TerminalResponseInterface, ClientApplication.TerminalApplicationResponse {
     private String serverAddress;
     private String serverPort;
 
     public ClientApplication clientApplication;
     private ClientApplication.TerminalApplicationResponse terminalApplicationResponse;
+
 
 
     public TerminalApplication(String serverAddress, int serverPort, ClientApplication clientApplication) throws InterruptedException {
@@ -20,6 +23,7 @@ public class TerminalApplication implements TerminalResponseInterface, ClientApp
         this.clientApplication = clientApplication;
         clientApplication.setTerminalApplicationResponse(this);
         clientApplication.connect(serverAddress, this.serverPort);
+
     }
 
     @Override
@@ -55,6 +59,27 @@ public class TerminalApplication implements TerminalResponseInterface, ClientApp
 
         try {
             clientApplication.ready();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void startSecureTalk() {
+        LoggingMessage.printSucceededMessage("Secure exchange with server!");
+        Scanner scanner = new Scanner(System.in);
+
+        LoggingMessage.printColoredText( "FILL THE EMPTY SPACE BELOW WITH A SPECIFIC SEARCH QUERY "+LoggingMessage.CLOSED_MAILBOX+ ":", LoggingMessage.ANSI_GREEN);
+        String toServer = scanner.nextLine();
+        // encrypt the data to send
+        try {
+            LoggingMessage.printProgress("ENCRYPTING DATA ...", LoggingMessage.CLOSED_LOCK_WITH_KEY);
+
+            String encryptedData = clientApplication.encrypt(toServer);
+            LoggingMessage.printColoredText("Encrypted Data: " + encryptedData, LoggingMessage.ANSI_GREEN);
+            LoggingMessage.printProgress("Sending Encrypted Data", LoggingMessage.PACKAGE);
+            clientApplication.sendMessage(encryptedData);
+            LoggingMessage.printOutStream("Data Sent to server");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
